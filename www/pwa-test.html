@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA测试 - 猫头鹰邮信短信群发</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fef2f2; color: #dc2626; }
+        .warning { background: #fef3c7; color: #d97706; }
+        .info { background: #dbeafe; color: #1d4ed8; }
+        button {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #ea580c;
+        }
+        button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .icon-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .icon-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .icon-item img {
+            display: block;
+            margin: 0 auto 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🦉 PWA功能测试</h1>
+
+    <div class="test-card">
+        <h2>📱 PWA基础检测</h2>
+        <div id="pwa-support"></div>
+        <div id="manifest-status"></div>
+        <div id="sw-status"></div>
+    </div>
+
+    <div class="test-card">
+        <h2>🎯 图标检测</h2>
+        <p>检查所有尺寸的应用图标是否正确加载：</p>
+        <div class="icon-preview" id="icon-preview">
+            <!-- 图标将在这里显示 -->
+        </div>
+        <button onclick="testIcons()">检测图标</button>
+    </div>
+
+    <div class="test-card">
+        <h2>⚙️ Service Worker 状态</h2>
+        <div id="sw-details"></div>
+        <button onclick="testServiceWorker()">测试Service Worker</button>
+        <button onclick="testOffline()">测试离线功能</button>
+    </div>
+
+    <div class="test-card">
+        <h2>📲 安装功能</h2>
+        <div id="install-status"></div>
+        <button id="install-btn" onclick="installPWA()" disabled>安装到桌面</button>
+        <button onclick="testInstallPrompt()">检测安装提示</button>
+    </div>
+
+    <div class="test-card">
+        <h2>🔔 推送通知</h2>
+        <div id="notification-status"></div>
+        <button onclick="testNotifications()">测试通知权限</button>
+        <button onclick="sendTestNotification()">发送测试通知</button>
+    </div>
+
+    <div class="test-card">
+        <h2>💾 离线存储</h2>
+        <div id="storage-status"></div>
+        <button onclick="testLocalStorage()">测试本地存储</button>
+        <button onclick="testIndexedDB()">测试IndexedDB</button>
+    </div>
+
+    <script>
+        let deferredPrompt;
+
+        // 页面加载时执行初始检测
+        window.addEventListener('load', () => {
+            checkPWASupport();
+            checkManifest();
+            checkServiceWorker();
+            checkInstallability();
+        });
+
+        // PWA支持检测
+        function checkPWASupport() {
+            const statusDiv = document.getElementById('pwa-support');
+
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                statusDiv.innerHTML = '<div class="status success">✅ 浏览器支持PWA功能</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="status error">❌ 浏览器不完全支持PWA功能</div>';
+            }
+        }
+
+        // Manifest检测
+        function checkManifest() {
+            const statusDiv = document.getElementById('manifest-status');
+
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    statusDiv.innerHTML = `
+                        <div class="status success">✅ Manifest加载成功</div>
+                        <div class="status info">应用名称: ${manifest.name}</div>
+                        <div class="status info">主题颜色: ${manifest.theme_color}</div>
+                        <div class="status info">图标数量: ${manifest.icons.length}</div>
+                    `;
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = '<div class="status error">❌ Manifest加载失败</div>';
+                });
+        }
+
+        // Service Worker检测
+        function checkServiceWorker() {
+            const statusDiv = document.getElementById('sw-status');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration()
+                    .then(registration => {
+                        if (registration) {
+                            statusDiv.innerHTML = `
+                                <div class="status success">✅ Service Worker已注册</div>
+                                <div class="status info">作用域: ${registration.scope}</div>
+                            `;
+                        } else {
+                            statusDiv.innerHTML = '<div class="status warning">⚠️ Service Worker未注册</div>';
+                        }
+                    });
+            } else {
+                statusDiv.innerHTML = '<div class="status error">❌ 浏览器不支持Service Worker</div>';
+            }
+        }
+
+        // 图标测试
+        function testIcons() {
+            const preview = document.getElementById('icon-preview');
+            const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+            preview.innerHTML = '';
+
+            sizes.forEach(size => {
+                const iconItem = document.createElement('div');
+                iconItem.className = 'icon-item';
+
+                const img = document.createElement('img');
+                img.src = `icons/icon-${size}x${size}.png`;
+                img.width = Math.min(size, 64);
+                img.height = Math.min(size, 64);
+                img.alt = `${size}x${size}`;
+
+                img.onload = () => {
+                    iconItem.innerHTML = `
+                        <img src="${img.src}" width="${img.width}" height="${img.height}" alt="${img.alt}">
+                        <small style="color: green;">${size}x${size} ✓</small>
+                    `;
+                };
+
+                img.onerror = () => {
+                    iconItem.innerHTML = `
+                        <div style="width: ${Math.min(size, 64)}px; height: ${Math.min(size, 64)}px; background: #f3f4f6; border: 1px dashed #d1d5db; display: flex; align-items: center; justify-content: center;">❌</div>
+                        <small style="color: red;">${size}x${size} ✗</small>
+                    `;
+                };
+
+                iconItem.appendChild(img);
+                preview.appendChild(iconItem);
+            });
+        }
+
+        // Service Worker详细测试
+        function testServiceWorker() {
+            const statusDiv = document.getElementById('sw-details');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    statusDiv.innerHTML = `
+                        <div class="status success">✅ Service Worker就绪</div>
+                        <div class="status info">状态: ${registration.active.state}</div>
+                        <div class="status info">脚本URL: ${registration.active.scriptURL}</div>
+                    `;
+                });
+            }
+        }
+
+        // 离线功能测试
+        function testOffline() {
+            const statusDiv = document.getElementById('sw-details');
+
+            // 测试缓存
+            caches.has('sms-messenger-v1.0.0').then(hasCache => {
+                if (hasCache) {
+                    caches.open('sms-messenger-v1.0.0').then(cache => {
+                        cache.keys().then(requests => {
+                            statusDiv.innerHTML += `
+                                <div class="status success">✅ 缓存存在</div>
+                                <div class="status info">缓存文件数量: ${requests.length}</div>
+                            `;
+                        });
+                    });
+                } else {
+                    statusDiv.innerHTML += '<div class="status warning">⚠️ 缓存不存在</div>';
+                }
+            });
+        }
+
+        // 安装提示检测
+        function checkInstallability() {
+            const statusDiv = document.getElementById('install-status');
+            const installBtn = document.getElementById('install-btn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.disabled = false;
+                statusDiv.innerHTML = '<div class="status success">✅ 应用可以安装</div>';
+            });
+
+            window.addEventListener('appinstalled', (evt) => {
+                statusDiv.innerHTML += '<div class="status success">🎉 应用已安装</div>';
+                deferredPrompt = null;
+                installBtn.disabled = true;
+            });
+        }
+
+        // 安装PWA
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('install-status').innerHTML +=
+                            '<div class="status success">✅ 用户接受了安装</div>';
+                    } else {
+                        document.getElementById('install-status').innerHTML +=
+                            '<div class="status warning">⚠️ 用户拒绝了安装</div>';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // 测试安装提示
+        function testInstallPrompt() {
+            const statusDiv = document.getElementById('install-status');
+
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                statusDiv.innerHTML = '<div class="status success">✅ 当前运行在独立模式（已安装）</div>';
+            } else {
+                statusDiv.innerHTML = '<div class="status info">ℹ️ 当前运行在浏览器模式</div>';
+            }
+        }
+
+        // 通知测试
+        function testNotifications() {
+            const statusDiv = document.getElementById('notification-status');
+
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    statusDiv.innerHTML = '<div class="status success">✅ 通知权限已授予</div>';
+                } else if (Notification.permission === 'denied') {
+                    statusDiv.innerHTML = '<div class="status error">❌ 通知权限被拒绝</div>';
+                } else {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            statusDiv.innerHTML = '<div class="status success">✅ 通知权限已授予</div>';
+                        } else {
+                            statusDiv.innerHTML = '<div class="status error">❌ 通知权限被拒绝</div>';
+                        }
+                    });
+                }
+            } else {
+                statusDiv.innerHTML = '<div class="status error">❌ 浏览器不支持通知</div>';
+            }
+        }
+
+        // 发送测试通知
+        function sendTestNotification() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('PWA测试通知', {
+                    body: '这是一条来自猫头鹰邮信的测试通知',
+                    icon: '/icons/icon-192x192.png',
+                    badge: '/icons/icon-72x72.png'
+                });
+
+                document.getElementById('notification-status').innerHTML +=
+                    '<div class="status success">✅ 测试通知已发送</div>';
+            } else {
+                document.getElementById('notification-status').innerHTML +=
+                    '<div class="status error">❌ 无法发送通知</div>';
+            }
+        }
+
+        // 本地存储测试
+        function testLocalStorage() {
+            const statusDiv = document.getElementById('storage-status');
+
+            try {
+                localStorage.setItem('pwa-test', 'success');
+                const result = localStorage.getItem('pwa-test');
+                localStorage.removeItem('pwa-test');
+
+                if (result === 'success') {
+                    statusDiv.innerHTML = '<div class="status success">✅ LocalStorage工作正常</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ LocalStorage异常</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ LocalStorage不可用</div>';
+            }
+        }
+
+        // IndexedDB测试
+        function testIndexedDB() {
+            const statusDiv = document.getElementById('storage-status');
+
+            if ('indexedDB' in window) {
+                const request = indexedDB.open('PWATest', 1);
+
+                request.onsuccess = () => {
+                    statusDiv.innerHTML += '<div class="status success">✅ IndexedDB工作正常</div>';
+                    request.result.close();
+                };
+
+                request.onerror = () => {
+                    statusDiv.innerHTML += '<div class="status error">❌ IndexedDB连接失败</div>';
+                };
+            } else {
+                statusDiv.innerHTML += '<div class="status error">❌ IndexedDB不支持</div>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+:root {
+  --primary-color: #1f2937; /* Darker blue-gray */
+  --secondary-color: #f97316; /* Orange */
+  --background-color: #111827; /* Very dark blue-gray */
+  --dark-background: #1a202c;
+  --dark-card-background: #2d3748;
+  --text-primary: #e2e8f0; /* Light gray */
+  --text-secondary: #94a3b8; /* Medium gray */
+  --dark-text-primary: #e2e8f0;
+  --dark-text-secondary: #a0aec0;
+}
+
+body {
+  font-family: 'Manrope', 'Noto Sans SC', sans-serif;
+  min-height: max(884px, 100dvh);
+}
+
+/* 按钮动画效果 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--secondary-color), #ff8533);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 107, 0, 0.4);
+}
+
+.btn-secondary {
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #374151;
+  transform: translateY(-1px);
+}
+
+/* 手机模型动画 */
+.phone-mockup {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-6deg);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .phone-mockup {
+    height: 400px;
+  }
+}
+
+/* 加载动画 */
+.loading {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 滚动优化 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: transparent;
+}
+
+/* 对于Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* 对于IE和Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* ========== 首页专用样式 ========== */
+
+/* 卡片悬停效果 */
+.card-hover {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 图标脉冲动画 */
+.icon-container {
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 功能卡片 */
+.feature-card {
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.feature-card:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+/* 底部导航栏 */
+.nav-item {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-item.active {
+  color: var(--secondary-color);
+}
+
+.nav-item:hover:not(.active) {
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+/* 导航活跃指示器 */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--secondary-color);
+  border-radius: 50%;
+}
+
+/* 进度条动画 */
+.progress-bar {
+  animation: progressLoad 2s ease-out;
+}
+
+@keyframes progressLoad {
+  from { width: 0%; }
+  to { width: 99%; }
+}
+
+/* 统计数字动画 */
+.stat-number {
+  animation: countUp 1.5s ease-out;
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== 功能页面专用样式 ========== */
+
+/* Light Theme Variables */
+:root {
+  --light-background: #f8f9fa;
+  --light-card-background: #ffffff;
+  --light-text-primary: #212529;
+  --light-text-secondary: #6c757d;
+  --light-border: #e9ecef;
+
+  /* Primary Color Palette */
+  --primary-50: #eef7ff;
+  --primary-100: #d8ecff;
+  --primary-200: #bde0ff;
+  --primary-300: #8ecfff;
+  --primary-400: #5ab1ff;
+  --primary-500: #2c8eff;
+  --primary-600: #0f6fff;
+  --primary-700: #005ae6;
+  --primary-800: #0049b8;
+  --primary-900: #00368c;
+  --primary-950: #00225c;
+
+  /* Neutral Color Palette */
+  --neutral-50: #f8f9fa;
+  --neutral-100: #f1f3f5;
+  --neutral-200: #e9ecef;
+  --neutral-300: #dee2e6;
+  --neutral-400: #ced4da;
+  --neutral-500: #adb5bd;
+  --neutral-600: #868e96;
+  --neutral-700: #495057;
+  --neutral-800: #343a40;
+  --neutral-900: #212529;
+  --neutral-950: #111418;
+}
+
+/* 功能卡片样式 */
+.feature-item {
+  border: 1px solid var(--neutral-200);
+  background: var(--light-card-background);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-600), var(--primary-400));
+  transition: left 0.3s ease;
+}
+
+.feature-item:hover::before {
+  left: 0;
+}
+
+.feature-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(15, 111, 255, 0.1);
+  border-color: var(--primary-200);
+}
+
+.feature-item:active {
+  transform: translateY(-4px);
+}
+
+/* 功能按钮样式 */
+.feature-btn {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.feature-btn:hover::before {
+  left: 100%;
+}
+
+.feature-btn:hover {
+  background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 111, 255, 0.3);
+}
+
+/* 图标容器样式 */
+.feature-item .group-hover\\:bg-blue-200,
+.feature-item .group-hover\\:bg-green-200,
+.feature-item .group-hover\\:bg-orange-200,
+.feature-item .group-hover\\:bg-purple-200,
+.feature-item .group-hover\\:bg-gray-200 {
+  transition: all 0.3s ease;
+}
+
+/* 浅色主题导航栏 */
+.nav-item-light {
+  color: var(--neutral-600);
+  transition: all 0.2s ease;
+}
+
+.nav-item-light:hover {
+  color: var(--primary-600);
+  transform: translateY(-2px);
+}
+
+.nav-item-light.active {
+  color: var(--primary-600);
+  background-color: var(--primary-100);
+}
+
+/* 头部样式 */
+.header-light {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+/* 页面过渡动画 */
+.page-transition {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 功能描述框样式 */
+.feature-description {
+  background: var(--neutral-50);
+  border-left: 3px solid var(--primary-200);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover .feature-description {
+  background: var(--primary-50);
+  border-left-color: var(--primary-400);
+}
+
+/* 加载状态 */
+.feature-btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.feature-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .feature-item {
+    margin-bottom: 1rem;
+  }
+
+  .feature-item:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* ========== 价格页面专用样式 ========== */
+
+/* Brand Colors */
+:root {
+  --brand-blue: #0B2A4B;
+  --brand-orange: #FF7A00;
+}
+
+/* 定价卡片样式 */
+.pricing-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-orange), #ff9533);
+  transition: left 0.3s ease;
+}
+
+.pricing-card:hover::before {
+  left: 0;
+}
+
+.pricing-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(11, 42, 75, 0.15);
+}
+
+/* 推荐方案特殊样式 */
+.pricing-card[data-plan="professional"] {
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.pricing-card[data-plan="professional"]:hover {
+  transform: translateY(-12px) scale(1.07);
+  box-shadow: 0 30px 60px rgba(255, 122, 0, 0.25);
+}
+
+/* 价格数字动画 */
+.price {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.price.updating {
+  animation: priceUpdate 0.6s ease-in-out;
+}
+
+@keyframes priceUpdate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); color: var(--brand-orange); }
+  100% { transform: scale(1); }
+}
+
+/* 切换按钮样式 */
+.toggle-btn {
+  color: #6B7280;
+  background: transparent;
+}
+
+.toggle-btn.active {
+  background: var(--brand-blue);
+  color: white;
+  box-shadow: 0 4px 12px rgba(11, 42, 75, 0.3);
+}
+
+.toggle-btn:hover:not(.active) {
+  background: #F3F4F6;
+  color: var(--brand-blue);
+}
+
+/* 方案按钮样式 */
+.plan-btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.plan-btn:hover::before {
+  left: 100%;
+}
+
+.plan-btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.plan-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* FAQ 样式 */
+.faq-item {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.faq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(11, 42, 75, 0.1);
+}
+
+.faq-item.active {
+  border-color: var(--brand-orange);
+}
+
+.faq-item.active .material-symbols-outlined {
+  transform: rotate(180deg);
+  color: var(--brand-orange);
+}
+
+.faq-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.faq-content.show {
+  max-height: 200px;
+  opacity: 1;
+}
+
+/* 标签样式 */
+.pricing-card span[class*="bg-"] {
+  transition: all 0.3s ease;
+}
+
+.pricing-card:hover span.bg-blue-100 {
+  background-color: #dbeafe;
+  transform: scale(1.05);
+}
+
+.pricing-card:hover span.bg-orange-100 {
+  background-color: #fed7aa;
+  transform: scale(1.05);
+}
+
+.pricing-card:hover span.bg-purple-100 {
+  background-color: #e9d5ff;
+  transform: scale(1.05);
+}
+
+/* 年付优惠动画 */
+.annual-note {
+  animation: highlightSavings 2s ease-in-out infinite;
+}
+
+@keyframes highlightSavings {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* 功能列表动画 */
+.pricing-card .material-symbols-outlined {
+  transition: all 0.3s ease;
+}
+
+.pricing-card:hover .material-symbols-outlined {
+  transform: scale(1.1);
+  color: var(--brand-orange);
+}
+
+/* 页面进入动画 */
+.pricing-card {
+  animation: slideInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.pricing-card:nth-child(1) { animation-delay: 0.1s; }
+.pricing-card:nth-child(2) { animation-delay: 0.2s; }
+.pricing-card:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .pricing-card[data-plan="professional"] {
+    transform: scale(1);
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-8px) scale(1.01);
+  }
+
+  .pricing-card[data-plan="professional"]:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .toggle-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* ========== 关于页面专用样式 ========== */
+
+/* Brand Colors for About Page */
+:root {
+  --brand-blue: #0f172a;
+  --brand-orange: #f97316;
+  --neutral-background: #f8fafc;
+  --neutral-border: #e2e8f0;
+  --neutral-text-primary: #1e293b;
+  --neutral-text-secondary: #64748b;
+}
+
+/* Accordion Styles */
+.accordion-item {
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.accordion-item[open] {
+  border-color: var(--brand-orange);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+.accordion-summary {
+  list-style: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.accordion-summary:hover {
+  background: rgba(249, 115, 22, 0.05);
+}
+
+/* Contact Items */
+.contact-item {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+}
+
+.contact-item:hover {
+  background: rgba(249, 115, 22, 0.05);
+  transform: translateX(4px);
+}
+
+.contact-item:active {
+  transform: translateX(2px);
+}
+
+/* Legal Items */
+.legal-item {
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.legal-item:hover {
+  background: rgba(249, 115, 22, 0.05);
+  transform: translateX(4px);
+}
+
+.legal-item:active {
+  transform: translateX(2px);
+}
+
+/* Account Items (for profile page) */
+.account-item {
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.account-item:hover {
+  background: rgba(249, 115, 22, 0.05);
+  transform: translateX(4px);
+}
+
+.account-item:active {
+  transform: translateX(2px);
+}
+
+/* Company Info Animation */
+.company-logo {
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* FAQ Expansion Animation */
+.accordion-item details > div {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+/* Profile Stats Animation */
+.stat-number {
+  animation: countUp 1s ease-out;
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Balance Display */
+.balance-display {
+  position: relative;
+}
+
+.balance-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.balance-display:hover::before {
+  transform: translateX(100%);
+}
+
+/* Logout Button Special Style */
+#logout-btn {
+  transition: all 0.3s ease;
+}
+
+#logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+#logout-btn:active {
+  transform: scale(0.98);
+}
+
+/* Recharge Button Enhancement */
+#recharge-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+#recharge-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+#recharge-btn:hover::before {
+  left: 100%;
+}
+
+/* Status Indicator */
+.status-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Page Loading Animation */
+.page-enter {
+  animation: pageSlideIn 0.5s ease-out;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Animation */
+section {
+  animation: sectionFadeIn 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+section:nth-child(1) { animation-delay: 0.1s; }
+section:nth-child(2) { animation-delay: 0.2s; }
+section:nth-child(3) { animation-delay: 0.3s; }
+section:nth-child(4) { animation-delay: 0.4s; }
+section:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes sectionFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .contact-item:hover,
+  .legal-item:hover,
+  .account-item:hover {
+    transform: translateX(2px);
+  }
+
+  .accordion-item {
+    border-radius: 0.5rem;
+  }
+
+  .balance-display {
+    text-align: center;
+  }
+}

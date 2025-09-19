@@ -1,0 +1,79 @@
+<!-- 首页主体内容 -->
+<main class="relative flex h-auto min-h-screen w-full flex-col bg-[var(--background-color)]" style='font-family: Manrope, "Noto Sans SC", sans-serif;'>
+
+    <!-- Header -->
+    <header class="bg-[var(--primary-color)] text-white p-6 text-center shadow-xl">
+        <h1 class="text-3xl font-extrabold leading-tight tracking-tight">一站式企业短信群发服务</h1>
+        <p class="text-sm font-normal text-[var(--text-secondary)] mt-2 max-w-md mx-auto">
+            稳定可靠，助力企业高效沟通，实现快速抵达、精准覆盖、智能管理。
+        </p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow p-6 space-y-6 pb-20">
+            <!-- 可靠到达 -->
+            <div class="feature-card bg-[var(--primary-color)] p-6 rounded-xl shadow-lg flex flex-col items-center text-center card-hover"
+                 data-feature="reliable">
+                <div class="bg-[var(--secondary-color)] p-3 rounded-full mb-4 icon-container">
+                    <span class="material-symbols-outlined text-4xl text-white">verified_user</span>
+                </div>
+                <h3 class="text-xl font-bold text-[var(--text-primary)] mb-1">可靠到达</h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    高速通道，稳定可靠，保障信息及时送达。
+                </p>
+                <div class="mt-4 w-full">
+                    <div class="flex justify-between text-xs text-[var(--text-secondary)] mb-1">
+                        <span>到达率</span>
+                        <span>99.9%</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-[var(--secondary-color)] h-2 rounded-full w-[99%] transition-all duration-1000"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模板审核 -->
+            <div class="feature-card bg-[var(--primary-color)] p-6 rounded-xl shadow-lg flex flex-col items-center text-center card-hover"
+                 data-feature="template">
+                <div class="bg-[var(--secondary-color)] p-3 rounded-full mb-4 icon-container">
+                    <span class="material-symbols-outlined text-4xl text-white">rule</span>
+                </div>
+                <h3 class="text-xl font-bold text-[var(--text-primary)] mb-1">智能模板</h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    智能审核，快速上线，助力企业提高效率。
+                </p>
+                <div class="mt-4 flex gap-2">
+                    <span class="px-2 py-1 bg-[var(--secondary-color)] text-white text-xs rounded">营销推广</span>
+                    <span class="px-2 py-1 bg-[var(--secondary-color)] text-white text-xs rounded opacity-80">验证码</span>
+                    <span class="px-2 py-1 bg-[var(--secondary-color)] text-white text-xs rounded opacity-60">通知</span>
+                </div>
+            </div>
+
+            <!-- 数据统计 -->
+            <div class="feature-card bg-[var(--primary-color)] p-6 rounded-xl shadow-lg flex flex-col items-center text-center card-hover border-2 border-[var(--secondary-color)]"
+                 data-feature="analytics">
+                <div class="bg-[var(--secondary-color)] p-3 rounded-full mb-4 icon-container">
+                    <span class="material-symbols-outlined text-4xl text-white">monitoring</span>
+                </div>
+                <h3 class="text-xl font-bold text-[var(--text-primary)] mb-1">数据统计</h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    实时统计，精准分析，助力企业优化策略。
+                </p>
+                <div class="mt-4 grid grid-cols-3 gap-4 w-full text-center">
+                    <div>
+                        <div class="text-lg font-bold text-gray-400" data-today-sent>0</div>
+                        <div class="text-xs text-[var(--text-secondary)]">今日发送</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-400" data-success-rate>-</div>
+                        <div class="text-xs text-[var(--text-secondary)]">成功率</div>
+                    </div>
+                    <div>
+                        <div class="text-lg font-bold text-gray-400" data-avg-time>-</div>
+                        <div class="text-xs text-[var(--text-secondary)]">平均耗时</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

@@ -1,0 +1,11 @@
+{
+  "appId": "com.sms.messenger",
+  "appName": "信使短信",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "SMS": {
+      "package": "@capacitor-community/sms"
+    }
+  }
+}

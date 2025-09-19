@@ -1,0 +1,24 @@
+{
+  "name": "sms-messenger",
+  "version": "1.0.0",
+  "description": "企业短信群发应用",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "start": "node server.js",
+    "dev": "serve www -p 3000",
+    "android": "npx cap run android",
+    "ios": "npx cap run ios"
+  },
+  "dependencies": {
+    "@byteowls/capacitor-sms": "^7.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "express": "^4.18.2",
+    "serve": "^14.2.5"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

@@ -1,0 +1,128 @@
+<!-- 任务管理页面 -->
+<main class="flex h-auto min-h-screen w-full flex-col bg-[var(--background-color)]" style='font-family: Manrope, "Noto Sans SC", sans-serif;'>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button id="back-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">arrow_back</span>
+            </button>
+            <h1 class="text-lg font-bold text-[var(--primary-color)]">发送任务</h1>
+            <button id="create-task-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">add</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow p-4 space-y-6 pb-20">
+
+        <!-- Quick Create Task -->
+        <section class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-bold text-[var(--primary-color)] mb-4">创建新任务</h2>
+
+            <div class="space-y-4">
+                <!-- Select Contacts -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">选择联系人</label>
+                    <button id="select-contacts-btn" class="w-full p-3 border border-gray-300 rounded-lg text-left hover:border-[var(--secondary-color)] transition-colors">
+                        <div class="flex items-center justify-between">
+                            <span id="contacts-text" class="text-gray-500">点击选择联系人或分组</span>
+                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+                        </div>
+                    </button>
+                    <div id="contacts-preview" class="hidden mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                        <!-- Selected contacts will show here -->
+                    </div>
+                </div>
+
+                <!-- Select Template -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">选择模板</label>
+                    <button id="select-template-btn" class="w-full p-3 border border-gray-300 rounded-lg text-left hover:border-[var(--secondary-color)] transition-colors">
+                        <div class="flex items-center justify-between">
+                            <span id="template-text" class="text-gray-500">点击选择短信模板</span>
+                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+                        </div>
+                    </button>
+                    <div id="template-preview" class="hidden mt-2 p-3 bg-green-50 rounded">
+                        <div class="text-sm text-green-700 font-medium mb-1" id="template-title"></div>
+                        <div class="text-sm text-gray-600" id="template-content"></div>
+                    </div>
+                </div>
+
+                <!-- Create Button -->
+                <button id="create-task-submit" class="w-full bg-[var(--secondary-color)] text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    发送
+                </button>
+
+                <!-- Task Summary -->
+                <div id="task-summary" class="hidden p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <h3 class="font-medium text-orange-800 mb-2">任务预览</h3>
+                    <div class="text-sm text-orange-700 space-y-1">
+                        <div>联系人: <span id="summary-contacts">未选择</span></div>
+                        <div>模板: <span id="summary-template">未选择</span></div>
+                        <div>预计费用: <span id="summary-cost">¥0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Task List -->
+        <section class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-[var(--primary-color)]">任务列表</h2>
+                <div class="flex gap-2">
+                    <button class="task-filter-btn active px-3 py-1 bg-[var(--secondary-color)] text-white rounded text-sm" data-status="all">
+                        全部
+                    </button>
+                    <button class="task-filter-btn px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200" data-status="pending">
+                        待发送
+                    </button>
+                    <button class="task-filter-btn px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200" data-status="running">
+                        发送中
+                    </button>
+                    <button class="task-filter-btn px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200" data-status="completed">
+                        已完成
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-4" id="task-list">
+                <div class="text-center text-gray-500 py-8">
+                    <span class="material-symbols-outlined text-4xl mb-2">task</span>
+                    <p>暂无发送任务</p>
+                    <p class="text-sm">点击上方按钮创建新任务</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+        <nav class="flex justify-around py-2">
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="home">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-xs font-medium">首页</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="features">
+                <span class="material-symbols-outlined">star</span>
+                <span class="text-xs font-medium">功能</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="pricing">
+                <span class="material-symbols-outlined">monetization_on</span>
+                <span class="text-xs font-medium">价格</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="about">
+                <span class="material-symbols-outlined">person</span>
+                <span class="text-xs font-medium">我的</span>
+            </a>
+        </nav>
+    </footer>
+
+</main>

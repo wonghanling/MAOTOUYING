@@ -1,0 +1,162 @@
+<!-- 价格方案页面主体内容 -->
+<main class="relative flex h-auto min-h-screen w-full flex-col justify-between overflow-x-hidden bg-[#F7F9FC]" style='font-family: Manrope, "Noto Sans SC", sans-serif;'>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button id="back-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">arrow_back</span>
+            </button>
+            <h1 class="text-lg font-bold text-[var(--primary-color)]">价格方案</h1>
+            <button id="help-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">help</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-col items-center py-10 px-4 pb-20">
+        <h1 class="text-[var(--primary-color)] text-3xl font-bold leading-tight tracking-tight text-center pb-3">
+            短信充值套餐
+        </h1>
+        <p class="text-[#5A6472] text-center text-base leading-relaxed mb-8 max-w-md">
+            统一单价3分/条，选择适合您的充值套餐。
+        </p>
+
+        <!-- 三个套餐卡片 -->
+        <div class="w-full max-w-sm space-y-4">
+
+            <!-- 基础套餐 -->
+            <div class="pricing-card flex flex-col gap-4 rounded-xl border-2 border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[var(--primary-color)]">基础套餐</h3>
+                        <p class="text-sm text-gray-500">适合个人用户</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-[var(--secondary-color)]">¥3</div>
+                        <div class="text-sm text-gray-500">100条短信</div>
+                    </div>
+                </div>
+                <button class="plan-btn w-full bg-gray-100 text-[var(--primary-color)] hover:bg-[var(--secondary-color)] hover:text-white transition-colors rounded-lg h-10 font-medium"
+                        data-plan="basic">
+                    选择基础套餐
+                </button>
+            </div>
+
+            <!-- 标准套餐 -->
+            <div class="pricing-card flex flex-col gap-4 rounded-xl border-2 border-[var(--secondary-color)] bg-white p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[var(--primary-color)]">标准套餐</h3>
+                        <p class="text-sm text-gray-500">推荐选择</p>
+                        <span class="inline-block bg-[var(--secondary-color)] text-white text-xs px-2 py-1 rounded-full mt-1">推荐</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-[var(--secondary-color)]">¥30</div>
+                        <div class="text-sm text-gray-500">1000条短信</div>
+                    </div>
+                </div>
+                <button class="plan-btn w-full bg-[var(--secondary-color)] text-white hover:opacity-90 transition-opacity rounded-lg h-10 font-medium"
+                        data-plan="standard">
+                    选择标准套餐
+                </button>
+            </div>
+
+            <!-- 企业套餐 -->
+            <div class="pricing-card flex flex-col gap-4 rounded-xl border-2 border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[var(--primary-color)]">企业套餐</h3>
+                        <p class="text-sm text-gray-500">大量发送优选</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-[var(--secondary-color)]">¥300</div>
+                        <div class="text-sm text-gray-500">10000条短信</div>
+                    </div>
+                </div>
+                <button class="plan-btn w-full bg-gray-100 text-[var(--primary-color)] hover:bg-[var(--secondary-color)] hover:text-white transition-colors rounded-lg h-10 font-medium"
+                        data-plan="enterprise">
+                    选择企业套餐
+                </button>
+            </div>
+        </div>
+
+        <!-- 服务特色 -->
+        <div class="mt-8 w-full max-w-sm">
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                <h3 class="text-lg font-bold text-[var(--primary-color)] mb-4 text-center">服务特色</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 text-[#333D4C]">
+                        <span class="material-symbols-outlined text-[var(--secondary-color)] text-lg">check_circle</span>
+                        <span class="text-sm">全国三网覆盖，99.9%到达率</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-[#333D4C]">
+                        <span class="material-symbols-outlined text-[var(--secondary-color)] text-lg">check_circle</span>
+                        <span class="text-sm">实时发送状态查询</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-[#333D4C]">
+                        <span class="material-symbols-outlined text-[var(--secondary-color)] text-lg">check_circle</span>
+                        <span class="text-sm">批量群发，支持万级并发</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-[#333D4C]">
+                        <span class="material-symbols-outlined text-[var(--secondary-color)] text-lg">check_circle</span>
+                        <span class="text-sm">7x24小时技术支持</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 充值说明 -->
+        <div class="mt-6 w-full max-w-sm">
+            <div class="bg-white rounded-lg p-6 border border-gray-200">
+                <h3 class="text-lg font-bold text-[var(--primary-color)] mb-4 text-center">充值说明</h3>
+                <div class="space-y-3 text-sm text-gray-600">
+                    <div class="flex justify-between">
+                        <span>统一单价：</span>
+                        <span class="font-medium">3分/条</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>充值有效期：</span>
+                        <span class="font-medium">永久有效</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>计费方式：</span>
+                        <span class="font-medium">按成功发送计费</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>支付方式：</span>
+                        <span class="font-medium">微信/支付宝</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+        <nav class="flex justify-around py-2">
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="home">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-xs font-medium">首页</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="features">
+                <span class="material-symbols-outlined">star</span>
+                <span class="text-xs font-medium">功能</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--secondary-color)] w-1/4 active"
+               href="#" data-page="pricing">
+                <span class="material-symbols-outlined text-[var(--secondary-color)]">monetization_on</span>
+                <span class="text-xs font-semibold">价格</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="about">
+                <span class="material-symbols-outlined">person</span>
+                <span class="text-xs font-medium">我的</span>
+            </a>
+        </nav>
+    </footer>
+</main>

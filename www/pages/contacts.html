@@ -1,0 +1,118 @@
+<!-- 联系人管理页面 -->
+<main class="flex h-auto min-h-screen w-full flex-col bg-[var(--background-color)]" style='font-family: Manrope, "Noto Sans SC", sans-serif;'>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div class="flex items-center justify-between p-4">
+            <button id="back-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">arrow_back</span>
+            </button>
+            <h1 class="text-lg font-bold text-[var(--primary-color)]">联系人管理</h1>
+            <button id="add-contact-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+                <span class="material-symbols-outlined text-2xl">add</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow p-4 space-y-6 pb-20">
+
+        <!-- Contact Groups -->
+        <section class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-[var(--primary-color)]">联系人分组</h2>
+                <button id="create-group-btn" class="text-[var(--secondary-color)] hover:text-orange-600 transition-colors">
+                    <span class="material-symbols-outlined">add_circle</span>
+                </button>
+            </div>
+
+            <div class="space-y-3" id="groups-list">
+                <!-- Default Group -->
+                <div class="group-item flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[var(--secondary-color)]">group</span>
+                        <div>
+                            <p class="font-medium">默认分组</p>
+                            <p class="text-sm text-gray-500">0 个联系人</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="import-to-group-btn text-[var(--secondary-color)] hover:text-orange-600 transition-colors"
+                                data-group-id="default" data-group-name="默认分组"
+                                title="导入联系人到此分组">
+                            <span class="material-symbols-outlined">upload</span>
+                        </button>
+                        <button class="edit-group-btn text-gray-400 hover:text-[var(--secondary-color)] transition-colors"
+                                data-group-id="default"
+                                title="编辑分组">
+                            <span class="material-symbols-outlined">edit</span>
+                        </button>
+                        <button class="delete-group-btn text-gray-400 hover:text-red-500 transition-colors"
+                                data-group-id="default"
+                                title="删除分组">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact List -->
+        <section class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-[var(--primary-color)]">联系人列表</h2>
+                <div class="flex items-center gap-2">
+                    <button id="search-btn" class="text-gray-400 hover:text-[var(--secondary-color)] transition-colors">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                    <button id="filter-btn" class="text-gray-400 hover:text-[var(--secondary-color)] transition-colors">
+                        <span class="material-symbols-outlined">filter_list</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4 hidden" id="search-bar">
+                <input type="text" placeholder="搜索联系人..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[var(--secondary-color)]">
+            </div>
+
+            <!-- Contact Items -->
+            <div class="space-y-3" id="contacts-list">
+                <div class="text-center text-gray-500 py-8">
+                    <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
+                    <p>暂无联系人</p>
+                    <p class="text-sm">点击上方按钮添加联系人</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-50">
+        <nav class="flex justify-around py-2">
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="home">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-xs font-medium">首页</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="features">
+                <span class="material-symbols-outlined">star</span>
+                <span class="text-xs font-medium">功能</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="pricing">
+                <span class="material-symbols-outlined">monetization_on</span>
+                <span class="text-xs font-medium">价格</span>
+            </a>
+            <a class="nav-btn nav-item flex flex-col items-center justify-center gap-1 text-[var(--text-secondary)] w-1/4"
+               href="#" data-page="about">
+                <span class="material-symbols-outlined">person</span>
+                <span class="text-xs font-medium">我的</span>
+            </a>
+        </nav>
+    </footer>
+
+</main>
