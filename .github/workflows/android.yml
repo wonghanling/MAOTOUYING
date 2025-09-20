@@ -67,26 +67,38 @@ jobs:
         if [ -f "node_modules/capacitor-sms/android/capacitor-sms/build.gradle" ]; then
           echo "Fixing capacitor-sms namespace and dependencies..."
           if ! grep -q "namespace" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
-            sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+            sed -i '/android {/a\    namespace "com.adrbrpa.sms.plugin.capacitorsms"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           fi
           # Fix Capacitor dependency to use local project instead of maven
           sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+
+          # Fix AndroidManifest.xml - remove package attribute
+          if [ -f "node_modules/capacitor-sms/android/capacitor-sms/src/main/AndroidManifest.xml" ]; then
+            echo "Removing package attribute from AndroidManifest.xml..."
+            sed -i 's/package="[^"]*"//g' node_modules/capacitor-sms/android/capacitor-sms/src/main/AndroidManifest.xml
+          fi
         fi
 
         # Also check alternative path structure
         if [ -f "node_modules/capacitor-sms/android/build.gradle" ]; then
           echo "Fixing capacitor-sms namespace and dependencies (alternative path)..."
           if ! grep -q "namespace" node_modules/capacitor-sms/android/build.gradle; then
-            sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/build.gradle
+            sed -i '/android {/a\    namespace "com.adrbrpa.sms.plugin.capacitorsms"' node_modules/capacitor-sms/android/build.gradle
           fi
           # Fix Capacitor dependency to use local project instead of maven
           sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
           sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
           sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
           sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
+
+          # Fix AndroidManifest.xml - alternative path
+          if [ -f "node_modules/capacitor-sms/android/src/main/AndroidManifest.xml" ]; then
+            echo "Removing package attribute from AndroidManifest.xml (alternative path)..."
+            sed -i 's/package="[^"]*"//g' node_modules/capacitor-sms/android/src/main/AndroidManifest.xml
+          fi
         fi
 
         # Check if there are any other build.gradle files in capacitor-sms
@@ -95,6 +107,10 @@ jobs:
         find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' {} \;
         find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' {} \;
         find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' {} \;
+
+        # Fix all AndroidManifest.xml files in capacitor-sms
+        find node_modules/capacitor-sms -name "AndroidManifest.xml" -exec echo "Found AndroidManifest.xml: {}" \;
+        find node_modules/capacitor-sms -name "AndroidManifest.xml" -exec sed -i 's/package="[^"]*"//g' {} \;
     - name: Verify Android structure
       run: |
         echo "Android directory structure:"
