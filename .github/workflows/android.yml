@@ -94,6 +94,12 @@ jobs:
 
           # Fix Java compatibility version in build.gradle
           sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+
+          # Add AndroidX dependencies to capacitor-sms build.gradle
+          if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
+            echo "Adding AndroidX dependencies to capacitor-sms build.gradle..."
+            sed -i '/dependencies {/a\    implementation "androidx.core:core:1.12.0"\n    implementation "androidx.appcompat:appcompat:1.6.1"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          fi
         fi
 
         # Also check alternative path structure
@@ -116,6 +122,12 @@ jobs:
 
           # Fix Java compatibility version in alternative path
           sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/build.gradle
+
+          # Add AndroidX dependencies to alternative path build.gradle
+          if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/build.gradle; then
+            echo "Adding AndroidX dependencies to alternative path build.gradle..."
+            sed -i '/dependencies {/a\    implementation "androidx.core:core:1.12.0"\n    implementation "androidx.appcompat:appcompat:1.6.1"' node_modules/capacitor-sms/android/build.gradle
+          fi
         fi
 
         # Check if there are any other build.gradle files in capacitor-sms
@@ -139,6 +151,10 @@ jobs:
 
         # Fix all build.gradle files for Java 11 compatibility
         find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' {} \;
+
+        # Add AndroidX dependencies to all capacitor-sms build.gradle files
+        echo "Adding AndroidX dependencies to all build.gradle files..."
+        find node_modules/capacitor-sms -name "build.gradle" -exec sh -c 'if ! grep -q "androidx.core:core" "$1"; then sed -i "/dependencies {/a\\    implementation \"androidx.core:core:1.12.0\"\\n    implementation \"androidx.appcompat:appcompat:1.6.1\"" "$1"; fi' sh {} \;
     - name: Verify Android structure
       run: |
         echo "Android directory structure:"
