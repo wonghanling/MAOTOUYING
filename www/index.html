@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>猫头鹰邮信短信群发</title>
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA禁用设置 -->
     <meta name="theme-color" content="#f97316">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="短信群发">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="no">
+    <meta name="mobile-web-app-capable" content="no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- 禁用PWA安装提示脚本 -->
+    <script src="js/disable-pwa.js"></script>
+
+    <!-- 支付SDK -->
+    <script src="js/payment-sdk.js"></script>
+    <script src="js/payment-config.js"></script>
 
     <!-- 字体和样式 -->
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -43,6 +48,47 @@
 
         .page.active {
             display: block;
+        }
+
+        /* 彻底隐藏所有PWA安装按钮 */
+        button[style*="position: fixed"],
+        div[style*="position: fixed"],
+        *[class*="install"],
+        *[id*="install"],
+        *[class*="pwa"],
+        *[id*="pwa"],
+        .app-install-banner,
+        #installPrompt,
+        .install-prompt,
+        .pwa-install,
+        .add-to-homescreen,
+        .a2hs,
+        #a2hs,
+        .install-app,
+        #install-app {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            top: -9999px !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            z-index: -9999 !important;
+        }
+
+        /* 特别针对橙色安装按钮 */
+        button[style*="#f97316"],
+        button[style*="rgb(249, 115, 22)"],
+        *[style*="background: #f97316"],
+        *[style*="background-color: #f97316"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            top: -9999px !important;
         }
     </style>
 </head>
@@ -82,145 +128,43 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/capacitor-sms.js"></script>
+    <script src="js/native-sms-sender.js"></script>
     <script src="js/payment-sdk.js"></script>
     <script type="module" src="js/capacitor-app.js"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
-        // 注册 Service Worker
+        // 完全禁用PWA功能
+        console.log('PWA功能已被完全禁用');
+
+        // 阻止任何PWA相关事件
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('✅ Service Worker 注册成功:', registration.scope);
-
-                        // 检查更新
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // 有新版本可用
-                                    if (confirm('发现新版本，是否立即更新？')) {
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.log('❌ Service Worker 注册失败:', error);
-                    });
-            });
-        } else {
-            console.log('❌ 浏览器不支持 Service Worker');
+            // 不注册Service Worker
+            console.log('Service Worker 注册已被禁用');
         }
 
-        // PWA 安装提示
-        let deferredPrompt;
-        let installBtn = null;
+        // 覆盖PWA相关函数
+        window.deferredPrompt = null;
+        window.installPWA = function() {
+            console.log('PWA安装已被禁用');
+            return false;
+        };
 
-        // 创建安装按钮
-        function createInstallButton() {
-            if (installBtn) return; // 避免重复创建
-
-            installBtn = document.createElement('button');
-            installBtn.innerHTML = '📱 安装应用到桌面';
-            installBtn.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 1000;
-                background: #f97316;
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 25px;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-                transition: all 0.3s ease;
-            `;
-
-            installBtn.onmouseover = () => {
-                installBtn.style.background = '#ea580c';
-                installBtn.style.transform = 'translateY(-2px)';
-            };
-
-            installBtn.onmouseout = () => {
-                installBtn.style.background = '#f97316';
-                installBtn.style.transform = 'translateY(0)';
-            };
-
-            installBtn.onclick = () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('✅ 用户接受了 PWA 安装');
-                        } else {
-                            console.log('❌ 用户拒绝了 PWA 安装');
-                        }
-                        deferredPrompt = null;
-                        if (installBtn) {
-                            installBtn.remove();
-                            installBtn = null;
-                        }
-                    });
-                }
-            };
-
-            document.body.appendChild(installBtn);
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('💡 PWA 安装提示可用');
+        // 阻止beforeinstallprompt事件的任何可能触发
+        window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
-            deferredPrompt = e;
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }, true);
 
-            // 显示自定义安装按钮
-            createInstallButton();
-        });
-
-        // 检测 PWA 安装
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('🎉 PWA 已安装到设备');
-            // 可以发送分析数据或显示感谢消息
-            if (installBtn) {
-                installBtn.remove();
-                installBtn = null;
-            }
-        });
-
-        // 强制显示安装按钮（如果5秒后没有自动显示）
-        setTimeout(() => {
-            if (!installBtn && !window.matchMedia('(display-mode: standalone)').matches) {
-                console.log('🔧 强制显示安装按钮');
-                createInstallButton();
-
-                // 如果没有deferredPrompt，创建一个提示
-                if (!deferredPrompt) {
-                    installBtn.onclick = () => {
-                        alert('请在浏览器菜单中选择"添加到主屏幕"或"安装应用"');
-                    };
-                }
-            }
-        }, 5000);
-
-        // 手动触发 PWA 安装
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ 用户接受了 PWA 安装');
-                    } else {
-                        console.log('❌ 用户拒绝了 PWA 安装');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
+        window.addEventListener('appinstalled', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }, true);
     </script>
 </body>
 </html>

@@ -132,6 +132,9 @@ class SMSMessengerApp {
                 const appPages = document.getElementById('app-pages');
                 appPages.innerHTML = mainContent.outerHTML;
 
+                // 为body添加当前页面标识，用于CSS样式控制
+                document.body.setAttribute('data-current-page', pageName);
+
                 // 更新导航状态
                 this.updateNavigationState(pageName);
 
@@ -376,12 +379,13 @@ class SMSMessengerApp {
     handleRecharge() {
         console.log('充值被点击');
 
-        // 初始化支付SDK
+        // 初始化支付SDK - 直接配置方式
         if (!this.paymentSDK) {
             this.paymentSDK = new HupijiaoPay({
-                appid: 'YOUR_APPID', // 部署时需要替换为实际的虎皮椒APPID
-                appSecret: 'YOUR_SECRET', // 部署时需要替换为实际的密钥
-                notifyUrl: `${window.location.origin}/api/payment/notify`
+                // 替换为您的真实虎皮椒配置
+                appid: 'YOUR_REAL_APPID',      // 需要替换
+                appSecret: 'YOUR_REAL_SECRET', // 需要替换
+                notifyUrl: `${window.location.origin}/payment-success.html`
             });
         }
 
@@ -393,7 +397,7 @@ class SMSMessengerApp {
             <div class="space-y-3">
                 <div class="text-center mb-4">
                     <h4 class="font-medium text-gray-800">选择充值套餐</h4>
-                    <p class="text-sm text-gray-500 mt-1">统一单价3分/条，充值后即可发送短信</p>
+                    <p class="text-sm text-gray-500 mt-1">充值后即可发送短信</p>
                 </div>
                 ${packages.map(pkg => `
                     <div class="package-item border border-gray-200 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer transition-all"
@@ -421,7 +425,7 @@ class SMSMessengerApp {
             </div>
         `;
 
-        const modal = this.createModal('短信充值', modalContent);
+        const modal = this.createModal('充值短信余额', modalContent);
         document.body.appendChild(modal);
 
         // 绑定套餐选择事件
@@ -444,14 +448,254 @@ class SMSMessengerApp {
                     title: item.dataset.title
                 };
 
-                // 发起支付
-                this.initiatePayment(packageData, modal);
+                // 通过API发起支付
+                this.initiatePaymentViaAPI(packageData, modal);
             });
         });
 
         cancelBtn.addEventListener('click', () => {
             modal.remove();
         });
+    }
+
+    async initiateDirectPayment(packageData, modal) {
+        this.showNotification('正在创建支付订单...', 'info');
+
+        try {
+            const result = await this.paymentSDK.createPayment({
+                amount: packageData.amount,
+                title: `充值${packageData.smsCount}条短信`,
+                description: packageData.title
+            });
+
+            if (result.success) {
+                modal.remove();
+
+                // 保存订单信息，用于支付回调
+                localStorage.setItem('pending_payment', JSON.stringify({
+                    orderId: result.orderId,
+                    packageData: packageData,
+                    timestamp: Date.now()
+                }));
+
+                // 显示支付提示
+                const paymentModal = this.createModal('支付确认', `
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-green-600 text-2xl">payment</span>
+                        </div>
+                        <h4 class="font-medium mb-2">支付订单已创建</h4>
+                        <p class="text-sm text-gray-600 mb-4">
+                            充值套餐：${packageData.title}<br>
+                            支付金额：¥${packageData.amount}<br>
+                            订单号：${result.orderId}
+                        </p>
+                        <div class="text-xs text-gray-500 mb-6">
+                            即将跳转到支付页面完成支付
+                        </div>
+                        <button id="close-payment-modal" class="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                            知道了
+                        </button>
+                    </div>
+                `);
+
+                document.body.appendChild(paymentModal);
+
+                paymentModal.querySelector('#close-payment-modal').addEventListener('click', () => {
+                    paymentModal.remove();
+                });
+
+                // 监听支付成功回调
+                this.paymentSDK.onPaymentSuccess((data) => {
+                    this.handlePaymentSuccess(packageData, data);
+                });
+
+                this.showNotification('支付页面已打开，请完成支付', 'success');
+            } else {
+                this.showNotification('创建支付订单失败：' + result.error, 'error');
+            }
+        } catch (error) {
+            console.error('支付失败:', error);
+            this.showNotification('支付功能暂时不可用，请稍后重试', 'error');
+        }
+    }
+
+    async initiatePaymentViaAPI(packageData, modal) {
+        this.showNotification('正在创建支付订单...', 'info');
+
+        try {
+            // 调用后端API创建支付订单
+            // TODO: 部署后替换为真实API地址
+            const API_BASE_URL = 'https://your-api.onrender.com'; // 部署后修改
+
+            const response = await fetch(`${API_BASE_URL}/api/payment/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: packageData.amount,
+                    title: `充值${packageData.smsCount}条短信`,
+                    description: packageData.title,
+                    smsCount: packageData.smsCount,
+                    userId: this.userInfo.phone || 'user_' + Date.now() // 用户标识
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                modal.remove();
+
+                // 保存订单信息到本地，用于支付成功后确认
+                localStorage.setItem('pending_payment', JSON.stringify({
+                    orderId: result.orderId,
+                    packageData: packageData,
+                    timestamp: Date.now()
+                }));
+
+                // 显示支付提示并跳转
+                const paymentModal = this.createModal('支付确认', `
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-green-600 text-2xl">payment</span>
+                        </div>
+                        <h4 class="font-medium mb-2">支付订单已创建</h4>
+                        <p class="text-sm text-gray-600 mb-4">
+                            充值套餐：${packageData.title}<br>
+                            支付金额：¥${packageData.amount}<br>
+                            订单号：${result.orderId}
+                        </p>
+                        <div class="text-xs text-gray-500 mb-6">
+                            即将跳转到支付页面，请完成支付
+                        </div>
+                        <div class="flex gap-3">
+                            <button id="cancel-payment-modal" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                                取消支付
+                            </button>
+                            <button id="confirm-payment-modal" class="flex-1 bg-[var(--secondary-color)] text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                                去支付
+                            </button>
+                        </div>
+                    </div>
+                `);
+
+                document.body.appendChild(paymentModal);
+
+                paymentModal.querySelector('#cancel-payment-modal').addEventListener('click', () => {
+                    paymentModal.remove();
+                    localStorage.removeItem('pending_payment');
+                });
+
+                paymentModal.querySelector('#confirm-payment-modal').addEventListener('click', () => {
+                    paymentModal.remove();
+                    // 跳转到支付页面
+                    window.location.href = result.paymentUrl;
+                });
+
+                // 启动支付状态检查
+                this.startPaymentStatusCheck(result.orderId);
+
+                this.showNotification('支付订单创建成功', 'success');
+            } else {
+                this.showNotification('创建支付订单失败：' + (result.error || '未知错误'), 'error');
+            }
+        } catch (error) {
+            console.error('支付失败:', error);
+            this.showNotification('网络错误，请检查API服务是否正常运行', 'error');
+        }
+    }
+
+    // 检查支付状态（轮询）
+    startPaymentStatusCheck(orderId) {
+        const checkInterval = setInterval(async () => {
+            try {
+                // TODO: 部署后替换为真实API地址
+                const API_BASE_URL = 'https://your-api.onrender.com'; // 部署后修改
+
+                const response = await fetch(`${API_BASE_URL}/api/payment/status/${orderId}`);
+                const result = await response.json();
+
+                if (result.status === 'paid') {
+                    clearInterval(checkInterval);
+                    this.handlePaymentSuccess();
+                } else if (result.status === 'failed') {
+                    clearInterval(checkInterval);
+                    this.showNotification('支付失败，请重试', 'error');
+                    localStorage.removeItem('pending_payment');
+                }
+            } catch (error) {
+                console.error('检查支付状态失败:', error);
+            }
+        }, 3000); // 每3秒检查一次
+
+        // 10分钟后停止检查
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 600000);
+    }
+
+    handlePaymentSuccess() {
+        const pendingPayment = localStorage.getItem('pending_payment');
+        if (!pendingPayment) return;
+
+        const paymentData = JSON.parse(pendingPayment);
+        const packageData = paymentData.packageData;
+
+        // 更新用户短信余额
+        if (!this.userInfo.smsBalance) {
+            this.userInfo.smsBalance = 0;
+        }
+
+        this.userInfo.smsBalance += packageData.smsCount;
+        this.saveUserInfo();
+
+        // 显示充值成功通知
+        this.showNotification(`充值成功！获得${packageData.smsCount}条短信`, 'success');
+
+        // 刷新页面显示
+        this.updateUserInfo();
+
+        // 记录充值历史
+        this.recordRechargeHistory({
+            orderId: paymentData.orderId,
+            packageData: packageData,
+            timestamp: new Date().toISOString(),
+            status: 'success'
+        });
+
+        // 清除本地待支付记录
+        localStorage.removeItem('pending_payment');
+    }
+
+    // 获取充值套餐（移到主类中）
+    getRechargePackages() {
+        return [
+            {
+                id: 1,
+                smsCount: 100,
+                amount: 3,
+                title: '基础套餐',
+                description: '100条短信',
+                unitPrice: '3分/条'
+            },
+            {
+                id: 2,
+                smsCount: 1000,
+                amount: 30,
+                title: '标准套餐',
+                description: '1000条短信',
+                unitPrice: '3分/条'
+            },
+            {
+                id: 3,
+                smsCount: 10000,
+                amount: 300,
+                title: '企业套餐',
+                description: '10000条短信',
+                unitPrice: '3分/条'
+            }
+        ];
     }
 
     async initiatePayment(packageData, modal) {
@@ -993,58 +1237,83 @@ class SMSMessengerApp {
         this.showNotification('正在解析文件...', 'info');
 
         try {
+            console.log('开始导入文件:', file.name, '大小:', file.size, '类型:', file.type);
+
+            // 检查文件大小（限制为5MB）
+            if (file.size > 5 * 1024 * 1024) {
+                this.showNotification('文件过大，请选择小于5MB的文件', 'error');
+                return;
+            }
+
             // 读取文件内容
             const fileContent = await this.readFileContent(file);
+            console.log('文件内容长度:', fileContent.length);
+
+            if (!fileContent || fileContent.length < 10) {
+                this.showNotification('文件内容为空或格式不正确', 'error');
+                return;
+            }
+
             const contacts = this.parseContactsFile(fileContent, file.type);
+            console.log('解析结果:', contacts);
 
             if (contacts.length === 0) {
-                this.showNotification('文件中没有找到有效的联系人数据', 'error');
+                this.showNotification('文件中没有找到有效的联系人数据，请检查文件格式', 'error');
                 return;
             }
 
             // 处理联系人数据
             let importedCount = 0;
             let skippedCount = 0;
+            let errorCount = 0;
 
             for (let i = 0; i < contacts.length; i++) {
                 const contact = contacts[i];
 
-                // 验证手机号格式
-                if (validatePhones) {
-                    const phoneRegex = /^1[3-9]\d{9}$/;
-                    if (!phoneRegex.test(contact.phone)) {
+                try {
+                    // 验证手机号格式
+                    if (validatePhones) {
+                        const phoneRegex = /^1[3-9]\d{9}$/;
+                        if (!phoneRegex.test(contact.phone)) {
+                            console.log(`跳过无效手机号: ${contact.phone}`);
+                            skippedCount++;
+                            continue;
+                        }
+                    }
+
+                    // 检查重复（只检查手机号）
+                    if (skipDuplicates && this.isPhoneExists(contact.phone)) {
+                        console.log(`跳过重复手机号: ${contact.phone}`);
                         skippedCount++;
                         continue;
                     }
-                }
 
-                // 检查重复（只检查手机号）
-                if (skipDuplicates && this.isPhoneExists(contact.phone)) {
-                    skippedCount++;
-                    continue;
-                }
+                    // 创建联系人对象
+                    const newContact = {
+                        id: Date.now() + i,
+                        name: contact.name,
+                        phone: contact.phone,
+                        group: groupId,
+                        remark: contact.remark || '',
+                        createdAt: new Date().toLocaleString()
+                    };
 
-                // 创建联系人对象
-                const newContact = {
-                    id: Date.now() + i,
-                    name: contact.name,
-                    phone: contact.phone,
-                    group: groupId,
-                    remark: contact.remark || '',
-                    createdAt: new Date().toLocaleString()
-                };
+                    // 保存到全局数据
+                    this.contacts.push(newContact);
 
-                // 保存到全局数据
-                this.contacts.push(newContact);
+                    // 添加到列表
+                    this.addContactToList(newContact, false); // false表示不重复保存
+                    importedCount++;
 
-                // 添加到列表
-                this.addContactToList(newContact, false); // false表示不重复保存
-                importedCount++;
+                    // 显示导入进度（每10个显示一次）
+                    if (i % 10 === 0 || i === contacts.length - 1) {
+                        this.showNotification(`导入中... ${i + 1}/${contacts.length}`, 'info');
+                        await this.delay(100);
+                    }
 
-                // 显示导入进度
-                if (i % 10 === 0) {
-                    this.showNotification(`导入中... ${i + 1}/${contacts.length}`, 'info');
-                    await this.delay(100);
+                } catch (contactError) {
+                    console.error('处理联系人失败:', contact, contactError);
+                    errorCount++;
                 }
             }
 
@@ -1055,11 +1324,14 @@ class SMSMessengerApp {
             this.updateGroupContactCounts();
 
             closeModal();
-            this.showNotification(`导入完成！成功导入 ${importedCount} 个联系人到指定分组，跳过 ${skippedCount} 个`, 'success');
+
+            // 显示详细的导入结果
+            const resultMessage = `导入完成！成功导入 ${importedCount} 个联系人，跳过 ${skippedCount} 个${errorCount > 0 ? `，错误 ${errorCount} 个` : ''}`;
+            this.showNotification(resultMessage, 'success');
 
         } catch (error) {
-            this.showNotification('文件解析失败，请检查文件格式', 'error');
-            console.error('File import error:', error);
+            console.error('文件导入失败:', error);
+            this.showNotification('文件解析失败，请检查文件格式是否正确', 'error');
         }
     }
 
@@ -1215,40 +1487,173 @@ class SMSMessengerApp {
     async readFileContent(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(e);
-            reader.readAsText(file, 'UTF-8');
+
+            reader.onload = (e) => {
+                try {
+                    const result = e.target.result;
+                    console.log('文件读取成功，数据类型:', typeof result);
+                    resolve(result);
+                } catch (error) {
+                    console.error('文件读取错误:', error);
+                    reject(error);
+                }
+            };
+
+            reader.onerror = (e) => {
+                console.error('FileReader错误:', e);
+                reject(new Error('文件读取失败，请重试'));
+            };
+
+            reader.onabort = () => {
+                reject(new Error('文件读取被中断'));
+            };
+
+            // 检测移动设备并调整读取方式
+            if (this.isMobileDevice()) {
+                console.log('移动设备环境，使用ArrayBuffer读取');
+
+                reader.onload = (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        console.log('ArrayBuffer读取成功，大小:', arrayBuffer.byteLength);
+
+                        // 尝试多种解码方式
+                        let text = '';
+
+                        // 方式1: 使用TextDecoder（推荐）
+                        try {
+                            const decoder = new TextDecoder('utf-8', { fatal: false });
+                            text = decoder.decode(arrayBuffer);
+                            console.log('TextDecoder解码成功');
+                        } catch (decodeError) {
+                            console.log('TextDecoder失败，尝试手动转换');
+
+                            // 方式2: 手动转换字节
+                            const bytes = new Uint8Array(arrayBuffer);
+                            const chars = [];
+
+                            for (let i = 0; i < bytes.length; i++) {
+                                chars.push(String.fromCharCode(bytes[i]));
+                            }
+
+                            text = chars.join('');
+
+                            // 尝试UTF-8解码
+                            try {
+                                text = decodeURIComponent(escape(text));
+                                console.log('UTF-8解码成功');
+                            } catch (utf8Error) {
+                                console.log('UTF-8解码失败，使用原始文本');
+                            }
+                        }
+
+                        if (!text || text.length === 0) {
+                            throw new Error('文件内容为空');
+                        }
+
+                        resolve(text);
+                    } catch (error) {
+                        console.error('移动设备文件处理失败:', error);
+                        reject(error);
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+            } else {
+                console.log('桌面环境，使用标准文本读取');
+                reader.readAsText(file, 'UTF-8');
+            }
         });
+    }
+
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               window.screen.width <= 768 ||
+               ('ontouchstart' in window);
     }
 
     parseContactsFile(content, fileType) {
         const contacts = [];
-        const lines = content.split('\n');
 
-        // 跳过标题行
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
+        try {
+            // 处理可能的编码问题
+            let cleanContent = content;
 
-            let columns;
-            if (fileType.includes('csv')) {
-                // CSV格式解析
-                columns = line.split(',').map(col => col.trim().replace(/^["']|["']$/g, ''));
-            } else {
-                // 简单的制表符或空格分隔
-                columns = line.split(/[\t\s]+/).filter(col => col.trim());
+            // 移除BOM标记（如果存在）
+            if (cleanContent.charCodeAt(0) === 0xFEFF) {
+                cleanContent = cleanContent.substr(1);
             }
 
-            if (columns.length >= 2) {
-                contacts.push({
-                    name: columns[0],
-                    phone: columns[1],
-                    remark: columns[2] || ''
-                });
+            // 统一换行符
+            cleanContent = cleanContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+            const lines = cleanContent.split('\n');
+            console.log(`解析文件: 总共 ${lines.length} 行数据`);
+
+            // 跳过标题行，从第二行开始
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                let columns;
+
+                if (fileType.includes('csv') || line.includes(',')) {
+                    // CSV格式解析 - 支持带引号的字段
+                    columns = this.parseCSVLine(line);
+                } else if (line.includes('\t')) {
+                    // 制表符分隔
+                    columns = line.split('\t').map(col => col.trim());
+                } else {
+                    // 空格分隔（最后的备选方案）
+                    columns = line.split(/\s+/).filter(col => col.trim());
+                }
+
+                // 确保至少有姓名和手机号
+                if (columns.length >= 2 && columns[0] && columns[1]) {
+                    const contact = {
+                        name: columns[0].trim(),
+                        phone: columns[1].trim(),
+                        remark: columns[2] ? columns[2].trim() : ''
+                    };
+
+                    // 简单的手机号验证
+                    if (contact.phone.length >= 11) {
+                        contacts.push(contact);
+                    }
+                }
+            }
+
+            console.log(`成功解析 ${contacts.length} 个联系人`);
+            return contacts;
+
+        } catch (error) {
+            console.error('解析文件内容失败:', error);
+            return [];
+        }
+    }
+
+    parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim().replace(/^[\"']|[\"']$/g, ''));
+                current = '';
+            } else {
+                current += char;
             }
         }
 
-        return contacts;
+        // 添加最后一个字段
+        result.push(current.trim().replace(/^[\"']|[\"']$/g, ''));
+
+        return result;
     }
 
     isPhoneExists(phone) {
@@ -2854,15 +3259,39 @@ class SMSMessengerApp {
         const submitBtn = document.getElementById('login-submit-btn');
         this.setButtonLoading(submitBtn, true, '登录中...');
 
-        // 模拟登录验证
+        // 验证码验证
         setTimeout(() => {
-            // 简单验证码验证（实际开发中应该调用后端API）
-            if (smsCode === '123456') {
+            // 从sessionStorage获取验证码信息
+            const storedCode = sessionStorage.getItem('verificationCode');
+            const storedPhone = sessionStorage.getItem('verificationPhone');
+            const codeExpiry = sessionStorage.getItem('codeExpiry');
+
+            // 检查验证码是否过期
+            if (!storedCode || !codeExpiry || Date.now() > parseInt(codeExpiry)) {
+                this.showNotification('验证码已过期，请重新获取', 'error');
+                this.setButtonLoading(submitBtn, false, '登录');
+                return;
+            }
+
+            // 检查手机号是否匹配
+            if (storedPhone !== phone) {
+                this.showNotification('手机号与验证码不匹配', 'error');
+                this.setButtonLoading(submitBtn, false, '登录');
+                return;
+            }
+
+            // 验证验证码
+            if (smsCode === storedCode) {
                 this.isLoggedIn = true;
                 this.userInfo = {
                     phone: phone,
                     loginTime: new Date().toISOString()
                 };
+
+                // 清除已使用的验证码
+                sessionStorage.removeItem('verificationCode');
+                sessionStorage.removeItem('verificationPhone');
+                sessionStorage.removeItem('codeExpiry');
 
                 this.showNotification('登录成功！', 'success');
 
@@ -2964,9 +3393,59 @@ class SMSMessengerApp {
         sendCodeBtn.disabled = true;
         sendCodeBtn.textContent = `发送中...`;
 
-        // 模拟发送验证码
-        setTimeout(() => {
-            this.showNotification('验证码已发送，请注意查收', 'success');
+        // 生成6位随机验证码
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // 保存验证码到sessionStorage用于验证
+        sessionStorage.setItem('verificationCode', verificationCode);
+        sessionStorage.setItem('verificationPhone', phone);
+        sessionStorage.setItem('codeExpiry', Date.now() + 5 * 60 * 1000); // 5分钟后过期
+
+        // 使用SMS插件发送验证码
+        if (window.capacitorSMS) {
+            window.capacitorSMS.send({
+                numbers: [phone],
+                text: `【猫头鹰邮信】您的验证码是${verificationCode}，5分钟内有效，请勿泄露给他人。`
+            }).then(() => {
+                this.showNotification('验证码已发送，请注意查收', 'success');
+
+                // 开始倒计时
+                const timer = setInterval(() => {
+                    sendCodeBtn.textContent = `${countdown}秒后重发`;
+                    countdown--;
+
+                    if (countdown < 0) {
+                        clearInterval(timer);
+                        sendCodeBtn.disabled = false;
+                        sendCodeBtn.textContent = '发送验证码';
+                    }
+                }, 1000);
+            }).catch((error) => {
+                console.error('发送验证码失败:', error);
+                // 降级处理：在Web环境下显示验证码
+                if (!window.Capacitor || !window.Capacitor.isNativePlatform()) {
+                    this.showNotification(`验证码: ${verificationCode}（测试模式）`, 'info');
+
+                    // 开始倒计时
+                    const timer = setInterval(() => {
+                        sendCodeBtn.textContent = `${countdown}秒后重发`;
+                        countdown--;
+
+                        if (countdown < 0) {
+                            clearInterval(timer);
+                            sendCodeBtn.disabled = false;
+                            sendCodeBtn.textContent = '发送验证码';
+                        }
+                    }, 1000);
+                } else {
+                    this.showNotification('发送验证码失败，请重试', 'error');
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.textContent = '发送验证码';
+                }
+            });
+        } else {
+            // 如果SMS插件不可用，显示验证码（测试模式）
+            this.showNotification(`验证码: ${verificationCode}（测试模式）`, 'info');
 
             // 开始倒计时
             const timer = setInterval(() => {
@@ -2979,7 +3458,7 @@ class SMSMessengerApp {
                     sendCodeBtn.textContent = '发送验证码';
                 }
             }, 1000);
-        }, 1000);
+        }
     }
 
     setButtonLoading(button, isLoading, loadingText = '加载中...') {

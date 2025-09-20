@@ -1,14 +1,17 @@
 <!-- 任务管理页面 -->
 <main class="flex h-auto min-h-screen w-full flex-col bg-[var(--background-color)]" style='font-family: Manrope, "Noto Sans SC", sans-serif;'>
 
+    <!-- Status Bar Padding -->
+    <div class="h-10 bg-[var(--secondary-color)] w-full"></div>
+
     <!-- Header -->
     <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div class="flex items-center justify-between p-4">
-            <button id="back-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+            <button id="back-btn" class="text-gray-900 hover:text-[var(--secondary-color)] transition-colors">
                 <span class="material-symbols-outlined text-2xl">arrow_back</span>
             </button>
-            <h1 class="text-lg font-bold text-[var(--primary-color)]">发送任务</h1>
-            <button id="create-task-btn" class="text-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors">
+            <h1 class="text-lg font-bold text-gray-900">发送任务</h1>
+            <button id="create-task-btn" class="text-gray-900 hover:text-[var(--secondary-color)] transition-colors">
                 <span class="material-symbols-outlined text-2xl">add</span>
             </button>
         </div>
@@ -19,7 +22,7 @@
 
         <!-- Quick Create Task -->
         <section class="bg-white rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-bold text-[var(--primary-color)] mb-4">创建新任务</h2>
+            <h2 class="text-lg font-bold text-gray-900 mb-4">创建新任务</h2>
 
             <div class="space-y-4">
                 <!-- Select Contacts -->
@@ -31,7 +34,7 @@
                             <span class="material-symbols-outlined text-gray-400">chevron_right</span>
                         </div>
                     </button>
-                    <div id="contacts-preview" class="hidden mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                    <div id="contacts-preview" class="hidden mt-2 p-2 bg-orange-50 rounded text-sm text-orange-700">
                         <!-- Selected contacts will show here -->
                     </div>
                 </div>
@@ -71,7 +74,7 @@
         <!-- Task List -->
         <section class="bg-white rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-[var(--primary-color)]">任务列表</h2>
+                <h2 class="text-lg font-bold text-gray-900">任务列表</h2>
                 <div class="flex gap-2">
                     <button class="task-filter-btn active px-3 py-1 bg-[var(--secondary-color)] text-white rounded text-sm" data-status="all">
                         全部
@@ -124,5 +127,28 @@
             </a>
         </nav>
     </footer>
+
+    <!-- CSS -->
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #ea580c;
+            --background-color: #f8fafc;
+            --text-secondary: #64748b;
+        }
+
+        .nav-item.active {
+            color: var(--secondary-color) !important;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+
+    <!-- JavaScript -->
+    <script src="../js/sms-sender.js"></script>
+    <script src="../js/tasks.js"></script>
 
 </main>

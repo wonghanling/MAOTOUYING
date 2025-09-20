@@ -1,0 +1,22 @@
+{
+  "name": "猫头鹰邮件",
+  "short_name": "猫头鹰邮件",
+  "description": "一站式企业短信群发服务平台",
+  "theme_color": "#f97316",
+  "background_color": "#1f2937",
+  "display": "browser",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "1.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "zh-CN",
+  "dir": "ltr"
+}

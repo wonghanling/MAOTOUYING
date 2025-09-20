@@ -1,69 +1,113 @@
-// 虎皮椒支付SDK - 前端版本
+// 虎皮椒支付SDK - 移动端优化版本
 class HupijiaoPay {
     constructor(config = {}) {
-        // 这些配置将在部署时通过环境变量或配置文件设置
         this.config = {
-            appid: config.appid || 'YOUR_APPID', // 虎皮椒APPID
-            appSecret: config.appSecret || 'YOUR_APP_SECRET', // 虎皮椒密钥
+            appid: config.appid || 'YOUR_APPID',
+            appSecret: config.appSecret || 'YOUR_SECRET',
             apiUrl: 'https://api.xunhupay.com/payment/do.html',
-            notifyUrl: config.notifyUrl || '', // 支付回调地址
+            notifyUrl: config.notifyUrl || '',
             ...config
         };
+
+        // 加载MD5库
+        this.loadMD5Library();
     }
 
-    // MD5哈希函数 (简单实现)
+    // 动态加载MD5库
+    async loadMD5Library() {
+        if (window.CryptoJS) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js';
+            script.onload = () => {
+                console.log('MD5库加载成功');
+                resolve();
+            };
+            script.onerror = () => {
+                console.warn('MD5库加载失败，使用备用方法');
+                resolve(); // 即使失败也继续，使用备用MD5
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // MD5哈希函数
     md5(str) {
-        // 注意：这里需要引入MD5库，或者使用服务端计算签名
-        // 为了安全考虑，建议在服务端计算签名
-        return this.simpleMd5(str);
+        if (window.CryptoJS && window.CryptoJS.MD5) {
+            return window.CryptoJS.MD5(str).toString();
+        } else {
+            // 备用简单MD5实现
+            return this.simpleMd5(str);
+        }
     }
 
-    // 简单的MD5实现（生产环境建议使用专业库）
+    // 简单MD5实现（用于备用）
     simpleMd5(str) {
-        // 这里使用crypto-js库的MD5，需要先引入
-        // 或者调用后端API来计算签名
-        return btoa(str).replace(/=/g, ''); // 临时实现
+        let hash = 0;
+        if (str.length === 0) return hash.toString();
+
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 转换为32位整数
+        }
+
+        return Math.abs(hash).toString(16);
     }
 
     // 生成签名
     getHash(params, appSecret) {
+        // 过滤掉空值和hash本身，然后按键名排序
         const sortedParams = Object.keys(params)
-            .filter(key => params[key] && key !== 'hash') // 过滤掉空值和hash本身
+            .filter(key => params[key] !== '' && params[key] !== null && params[key] !== undefined && key !== 'hash')
             .sort()
             .map(key => `${key}=${params[key]}`)
             .join('&');
 
         const stringSignTemp = sortedParams + appSecret;
+        console.log('签名字符串:', stringSignTemp);
+
         const hash = this.md5(stringSignTemp);
+        console.log('生成的签名:', hash);
+
         return hash;
     }
 
     // 生成随机字符串
     generateNonce() {
-        return Date.now().toString(16).slice(0, 6) + '-' + Math.random().toString(16).slice(2, 8);
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     }
 
     // 生成订单号
     generateOrderId() {
-        return 'SMS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        return 'SMS_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
     }
 
     // 获取当前时间戳
     nowDate() {
-        return Math.floor(new Date().valueOf() / 1000);
+        return Math.floor(Date.now() / 1000);
     }
 
     // 发起支付
     async createPayment(options) {
+        console.log('开始创建支付订单:', options);
+
+        // 等待MD5库加载
+        await this.loadMD5Library();
+
         const orderId = this.generateOrderId();
+        const timestamp = this.nowDate();
 
         const params = {
             version: '1.1',
             appid: this.config.appid,
             trade_order_id: orderId,
-            total_fee: options.amount, // 金额，最多两位小数
+            total_fee: options.amount.toFixed(2), // 确保是两位小数
             title: options.title || '短信充值',
-            time: this.nowDate(),
+            time: timestamp,
             notify_url: this.config.notifyUrl,
             nonce_str: this.generateNonce(),
             type: 'WAP', // 手机网页支付
@@ -71,19 +115,14 @@ class HupijiaoPay {
             wap_name: '短信群发应用'
         };
 
+        console.log('支付参数:', params);
+
         // 生成签名
         const hash = this.getHash(params, this.config.appSecret);
-
-        // 构建请求参数
-        const requestParams = {
-            ...params,
-            hash
-        };
+        params.hash = hash;
 
         try {
-            // 由于前端跨域限制，这里需要通过后端代理或JSONP
-            // 实际部署时，建议在后端处理支付请求
-            const response = await this.makePaymentRequest(requestParams);
+            const response = await this.makePaymentRequest(params);
 
             return {
                 success: true,
@@ -95,46 +134,103 @@ class HupijiaoPay {
             console.error('支付请求失败:', error);
             return {
                 success: false,
-                error: error.message
+                error: error.message || '支付请求失败'
             };
         }
     }
 
-    // 发送支付请求（需要后端支持）
+    // 发送支付请求
     async makePaymentRequest(params) {
-        // 方案1：直接跳转到支付页面（推荐）
+        console.log('发送支付请求:', params);
+
+        // 检查是否为测试环境
+        if (this.config.appid === 'YOUR_APPID' || this.config.appSecret === 'YOUR_SECRET') {
+            console.warn('使用测试配置，模拟支付流程');
+            return this.simulatePayment(params);
+        }
+
+        // 构建支付URL
         const formData = new URLSearchParams(params);
         const paymentUrl = `${this.config.apiUrl}?${formData.toString()}`;
 
-        // 打开支付页面
-        window.open(paymentUrl, '_blank');
+        console.log('支付URL:', paymentUrl);
+
+        // 在移动端打开支付页面
+        if (this.isMobileDevice()) {
+            // 移动端直接跳转
+            window.location.href = paymentUrl;
+        } else {
+            // 桌面端新窗口打开
+            const paymentWindow = window.open(paymentUrl, '_blank', 'width=800,height=600');
+
+            if (!paymentWindow) {
+                throw new Error('支付页面被浏览器拦截，请允许弹出窗口');
+            }
+        }
 
         return { url: paymentUrl };
-
-        // 方案2：通过后端代理（更安全）
-        // const response = await fetch('/api/payment/create', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(params)
-        // });
-        // return response.json();
     }
 
-    // 验证支付回调（后端使用）
+    // 模拟支付（测试用）
+    async simulatePayment(params) {
+        console.log('模拟支付流程');
+
+        // 模拟网络延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 模拟支付成功，延迟3秒后回调
+        setTimeout(() => {
+            const mockData = {
+                trade_order_id: params.trade_order_id,
+                total_fee: params.total_fee,
+                transaction_id: 'MOCK_' + Date.now(),
+                status: 'OD'
+            };
+
+            // 触发支付成功事件
+            window.dispatchEvent(new CustomEvent('paymentSuccess', {
+                detail: mockData
+            }));
+        }, 3000);
+
+        return {
+            url: '#mock-payment',
+            mockPayment: true
+        };
+    }
+
+    // 检测是否为移动设备
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               window.screen.width <= 768;
+    }
+
+    // 验证支付回调
     verifyCallback(data) {
         const hash = this.getHash(data, this.config.appSecret);
         return hash === data.hash;
     }
 
-    // 处理支付成功回调
+    // 监听支付成功
     onPaymentSuccess(callback) {
-        // 监听页面消息或轮询订单状态
+        // 监听支付成功事件
+        window.addEventListener('paymentSuccess', (event) => {
+            console.log('支付成功回调:', event.detail);
+            callback(event.detail);
+        });
+
+        // 监听页面消息（用于跨窗口通信）
         window.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'payment_success') {
+                console.log('支付成功消息:', event.data);
                 callback(event.data);
             }
+        });
+
+        // 监听页面焦点（用户可能从支付页面返回）
+        window.addEventListener('focus', () => {
+            console.log('页面重新获得焦点，检查支付状态');
+            // 这里可以添加检查支付状态的逻辑
         });
     }
 
