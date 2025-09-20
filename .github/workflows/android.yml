@@ -53,15 +53,29 @@ jobs:
     - name: Sync Capacitor
       run: |
         npx cap sync android
-    - name: Fix byteowls capacitor-sms namespace
+    - name: Fix capacitor-sms plugins namespace
       run: |
-        if [ -f "node_modules/@byteowls/capacitor-sms/android/src/main/AndroidManifest.xml" ]; then
+        # Fix @byteowls/capacitor-sms namespace
+        if [ -f "node_modules/@byteowls/capacitor-sms/android/build.gradle" ]; then
           echo "Fixing @byteowls/capacitor-sms namespace..."
-          # Check if namespace exists in build.gradle, if not add it
-          if [ -f "node_modules/@byteowls/capacitor-sms/android/build.gradle" ]; then
-            if ! grep -q "namespace" node_modules/@byteowls/capacitor-sms/android/build.gradle; then
-              sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/@byteowls/capacitor-sms/android/build.gradle
-            fi
+          if ! grep -q "namespace" node_modules/@byteowls/capacitor-sms/android/build.gradle; then
+            sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/@byteowls/capacitor-sms/android/build.gradle
+          fi
+        fi
+
+        # Fix capacitor-sms namespace
+        if [ -f "node_modules/capacitor-sms/android/capacitor-sms/build.gradle" ]; then
+          echo "Fixing capacitor-sms namespace..."
+          if ! grep -q "namespace" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
+            sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          fi
+        fi
+
+        # Also check alternative path structure
+        if [ -f "node_modules/capacitor-sms/android/build.gradle" ]; then
+          echo "Fixing capacitor-sms namespace (alternative path)..."
+          if ! grep -q "namespace" node_modules/capacitor-sms/android/build.gradle; then
+            sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/build.gradle
           fi
         fi
     - name: Verify Android structure
