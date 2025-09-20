@@ -3405,7 +3405,7 @@ class SMSMessengerApp {
         if (window.capacitorSMS) {
             window.capacitorSMS.send({
                 numbers: [phone],
-                text: `【猫头鹰邮信】您的验证码是${verificationCode}，5分钟内有效，请勿泄露给他人。`
+                text: `【猫头鹰寄信】您的验证码是${verificationCode}，5分钟内有效，请勿泄露给他人。`
             }).then(() => {
                 this.showNotification('验证码已发送，请注意查收', 'success');
 

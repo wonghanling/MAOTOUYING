@@ -365,7 +365,7 @@ class AboutPage {
         return {
             version: 'v2.1.0',
             updateTime: '2024-01-15',
-            developer: '猫头鹰邮信科技有限公司',
+            developer: '猫头鹰寄信科技有限公司',
             license: 'ICP备案号: 京ICP备12345678号'
         };
     }

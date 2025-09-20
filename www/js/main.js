@@ -1,4 +1,4 @@
-// 猫头鹰邮信短信群发平台 - 主要交互逻辑
+// 猫头鹰寄信短信群发平台 - 主要交互逻辑
 class SmsApp {
     constructor() {
         this.init();

@@ -112,7 +112,7 @@ class HupijiaoPay {
             nonce_str: this.generateNonce(),
             type: 'WAP', // 手机网页支付
             wap_url: window.location.origin,
-            wap_name: '短信群发应用'
+            wap_name: '猫头鹰寄信'
         };
 
         console.log('支付参数:', params);
