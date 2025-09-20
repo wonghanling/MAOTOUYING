@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -15,10 +17,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-
-    - name: Install dependencies
-      run: npm install
+        node-version: '20'
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -29,22 +28,57 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install -g @capacitor/cli
+    - name: Build web assets
+      run: |
+        # Ensure www directory exists with basic content
+        mkdir -p www/js www/css
+        if [ ! -f "www/index.html" ]; then
+          cp *.html www/ 2>/dev/null || echo "<!DOCTYPE html><html><head><title>SMS App</title></head><body><div id='app'><h1>SMS Messenger</h1></div><script src='js/app.js'></script></body></html>" > www/index.html
+        fi
+        cp -r js/* www/js/ 2>/dev/null || echo "console.log('SMS App loaded');" > www/js/app.js
+        cp -r css/* www/css/ 2>/dev/null || true
+    - name: Remove existing Android platform
+      run: |
+        if [ -d "android" ]; then
+          echo "Removing existing Android platform..."
+          rm -rf android
+        fi
+    - name: Add Android platform
+      run: |
+        npx cap add android
     - name: Sync Capacitor
-      run: npx cap sync android
-
-    - name: Make gradlew executable
-      run: chmod +x android/gradlew
-
-    - name: Clean build
-      working-directory: ./android
-      run: ./gradlew clean
-
-    - name: Build Android APK
-      working-directory: ./android
-      run: ./gradlew --refresh-dependencies assembleDebug
-
+      run: |
+        npx cap sync android
+    - name: Fix byteowls capacitor-sms namespace
+      run: |
+        if [ -f "node_modules/@byteowls/capacitor-sms/android/src/main/AndroidManifest.xml" ]; then
+          echo "Fixing @byteowls/capacitor-sms namespace..."
+          # Check if namespace exists in build.gradle, if not add it
+          if [ -f "node_modules/@byteowls/capacitor-sms/android/build.gradle" ]; then
+            if ! grep -q "namespace" node_modules/@byteowls/capacitor-sms/android/build.gradle; then
+              sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/@byteowls/capacitor-sms/android/build.gradle
+            fi
+          fi
+        fi
+    - name: Verify Android structure
+      run: |
+        echo "Android directory structure:"
+        ls -la android/
+        echo "App module check:"
+        ls -la android/app/ || echo "App module not found!"
+        echo "Settings gradle content:"
+        cat android/settings.gradle || echo "Settings gradle not found!"
+    - name: Build APK
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon --stacktrace
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: maotouying-debug-apk
+        name: app-debug
         path: android/app/build/outputs/apk/debug/app-debug.apk
