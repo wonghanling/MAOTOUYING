@@ -95,6 +95,10 @@ jobs:
           # Fix Java compatibility version in build.gradle
           sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
 
+          # Update compileSdkVersion to 34 for Java 11 support
+          sed -i 's/compileSdkVersion [0-9]\+/compileSdkVersion 34/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          sed -i 's/targetSdkVersion [0-9]\+/targetSdkVersion 34/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+
           # Add AndroidX dependencies to capacitor-sms build.gradle
           echo "Adding AndroidX dependencies to capacitor-sms build.gradle..."
           if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
@@ -144,6 +148,10 @@ jobs:
 
           # Fix Java compatibility version in alternative path
           sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/build.gradle
+
+          # Update compileSdkVersion to 34 for Java 11 support in alternative path
+          sed -i 's/compileSdkVersion [0-9]\+/compileSdkVersion 34/g' node_modules/capacitor-sms/android/build.gradle
+          sed -i 's/targetSdkVersion [0-9]\+/targetSdkVersion 34/g' node_modules/capacitor-sms/android/build.gradle
 
           # Add AndroidX dependencies to alternative path build.gradle
           echo "Adding AndroidX dependencies to alternative path build.gradle..."
@@ -195,10 +203,19 @@ jobs:
 
         # Fix all build.gradle files for Java 11 compatibility
         find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' {} \;
+
+        # Update all compileSdkVersion and targetSdkVersion to 34
+        echo "Updating SDK versions to 34 for all capacitor-sms build.gradle files..."
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/compileSdkVersion [0-9]\+/compileSdkVersion 34/g' {} \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/targetSdkVersion [0-9]\+/targetSdkVersion 34/g' {} \;
     - name: Add AndroidX dependencies to app build.gradle
       run: |
         echo "Adding AndroidX dependencies to android/app/build.gradle..."
         if [ -f "android/app/build.gradle" ]; then
+          # Update app SDK versions to 34
+          sed -i 's/compileSdkVersion [0-9]\+/compileSdkVersion 34/g' android/app/build.gradle
+          sed -i 's/targetSdkVersion [0-9]\+/targetSdkVersion 34/g' android/app/build.gradle
+
           # Check if AndroidX dependencies already exist
           if ! grep -q "androidx.core:core" android/app/build.gradle; then
             # Find the dependencies block and add AndroidX dependencies
