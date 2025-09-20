@@ -98,11 +98,22 @@ jobs:
           # Add AndroidX dependencies to capacitor-sms build.gradle
           echo "Adding AndroidX dependencies to capacitor-sms build.gradle..."
           if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
-            # Check if dependencies block exists, if not create it
-            if ! grep -q "dependencies {" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
+            # Find the last dependencies block (not in buildscript) and add AndroidX dependencies
+            # Use awk to find the correct dependencies block after android block
+            awk '
+            /^android \{/ { in_android = 1 }
+            /^dependencies \{/ && in_android {
+              print $0
+              print "    implementation \"androidx.core:core:1.12.0\""
+              print "    implementation \"androidx.appcompat:appcompat:1.6.1\""
+              next
+            }
+            { print }
+            ' node_modules/capacitor-sms/android/capacitor-sms/build.gradle > temp_build.gradle && mv temp_build.gradle node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+
+            # If no dependencies block found after android block, add it at the end
+            if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
               echo -e "\ndependencies {\n    implementation \"androidx.core:core:1.12.0\"\n    implementation \"androidx.appcompat:appcompat:1.6.1\"\n}" >> node_modules/capacitor-sms/android/capacitor-sms/build.gradle
-            else
-              sed -i '/dependencies {/a\    implementation "androidx.core:core:1.12.0"\n    implementation "androidx.appcompat:appcompat:1.6.1"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
             fi
             echo "AndroidX dependencies added to capacitor-sms"
           fi
@@ -137,11 +148,22 @@ jobs:
           # Add AndroidX dependencies to alternative path build.gradle
           echo "Adding AndroidX dependencies to alternative path build.gradle..."
           if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/build.gradle; then
-            # Check if dependencies block exists, if not create it
-            if ! grep -q "dependencies {" node_modules/capacitor-sms/android/build.gradle; then
+            # Find the last dependencies block (not in buildscript) and add AndroidX dependencies
+            # Use awk to find the correct dependencies block after android block
+            awk '
+            /^android \{/ { in_android = 1 }
+            /^dependencies \{/ && in_android {
+              print $0
+              print "    implementation \"androidx.core:core:1.12.0\""
+              print "    implementation \"androidx.appcompat:appcompat:1.6.1\""
+              next
+            }
+            { print }
+            ' node_modules/capacitor-sms/android/build.gradle > temp_build.gradle && mv temp_build.gradle node_modules/capacitor-sms/android/build.gradle
+
+            # If no dependencies block found after android block, add it at the end
+            if ! grep -q "androidx.core:core" node_modules/capacitor-sms/android/build.gradle; then
               echo -e "\ndependencies {\n    implementation \"androidx.core:core:1.12.0\"\n    implementation \"androidx.appcompat:appcompat:1.6.1\"\n}" >> node_modules/capacitor-sms/android/build.gradle
-            else
-              sed -i '/dependencies {/a\    implementation "androidx.core:core:1.12.0"\n    implementation "androidx.appcompat:appcompat:1.6.1"' node_modules/capacitor-sms/android/build.gradle
             fi
             echo "AndroidX dependencies added to alternative path"
           fi
