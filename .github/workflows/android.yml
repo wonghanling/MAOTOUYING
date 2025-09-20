@@ -53,7 +53,7 @@ jobs:
     - name: Sync Capacitor
       run: |
         npx cap sync android
-    - name: Fix capacitor-sms plugins namespace
+    - name: Fix capacitor-sms plugins namespace and dependencies
       run: |
         # Fix @byteowls/capacitor-sms namespace
         if [ -f "node_modules/@byteowls/capacitor-sms/android/build.gradle" ]; then
@@ -63,21 +63,29 @@ jobs:
           fi
         fi
 
-        # Fix capacitor-sms namespace
+        # Fix capacitor-sms namespace and dependencies
         if [ -f "node_modules/capacitor-sms/android/capacitor-sms/build.gradle" ]; then
-          echo "Fixing capacitor-sms namespace..."
+          echo "Fixing capacitor-sms namespace and dependencies..."
           if ! grep -q "namespace" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
             sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           fi
+          # Fix old Capacitor dependency
+          sed -i 's/ionic-team:capacitor-android:[0-9]\+\+/com.capacitorjs:capacitor-android:5.0.0/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
         fi
 
         # Also check alternative path structure
         if [ -f "node_modules/capacitor-sms/android/build.gradle" ]; then
-          echo "Fixing capacitor-sms namespace (alternative path)..."
+          echo "Fixing capacitor-sms namespace and dependencies (alternative path)..."
           if ! grep -q "namespace" node_modules/capacitor-sms/android/build.gradle; then
             sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/build.gradle
           fi
+          # Fix old Capacitor dependency
+          sed -i 's/ionic-team:capacitor-android:[0-9]\+\+/com.capacitorjs:capacitor-android:5.0.0/g' node_modules/capacitor-sms/android/build.gradle
         fi
+
+        # Check if there are any other build.gradle files in capacitor-sms
+        find node_modules/capacitor-sms -name "build.gradle" -exec echo "Found build.gradle: {}" \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/ionic-team:capacitor-android:[0-9]\+\+/com.capacitorjs:capacitor-android:5.0.0/g' {} \;
     - name: Verify Android structure
       run: |
         echo "Android directory structure:"
