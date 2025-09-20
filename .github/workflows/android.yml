@@ -69,9 +69,11 @@ jobs:
           if ! grep -q "namespace" node_modules/capacitor-sms/android/capacitor-sms/build.gradle; then
             sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
           fi
-          # Fix old Capacitor dependency and remove + versions
-          sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
-          sed -i 's/com\.capacitorjs:capacitor-android:[0-9][^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          # Fix Capacitor dependency to use local project instead of maven
+          sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
+          sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
         fi
 
         # Also check alternative path structure
@@ -80,15 +82,19 @@ jobs:
           if ! grep -q "namespace" node_modules/capacitor-sms/android/build.gradle; then
             sed -i '/android {/a\    namespace "com.byteowls.capacitor.sms"' node_modules/capacitor-sms/android/build.gradle
           fi
-          # Fix old Capacitor dependency and remove + versions
-          sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' node_modules/capacitor-sms/android/build.gradle
-          sed -i 's/com\.capacitorjs:capacitor-android:[0-9][^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' node_modules/capacitor-sms/android/build.gradle
+          # Fix Capacitor dependency to use local project instead of maven
+          sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
+          sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
+          sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
+          sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' node_modules/capacitor-sms/android/build.gradle
         fi
 
         # Check if there are any other build.gradle files in capacitor-sms
         find node_modules/capacitor-sms -name "build.gradle" -exec echo "Found build.gradle: {}" \;
-        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' {} \;
-        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/com\.capacitorjs:capacitor-android:[0-9][^"'\'']*[+]/com.capacitorjs:capacitor-android:5.2.3/g' {} \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/ionic-team:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' {} \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/com\.capacitorjs:capacitor-android:[^"'\'']*[+\]\*]/project('\'':capacitor-android'\'')/g' {} \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/implementation '\''ionic-team:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' {} \;
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/implementation '\''com\.capacitorjs:capacitor-android:[^'\'']*'\''/implementation project('\'':capacitor-android'\'')/g' {} \;
     - name: Verify Android structure
       run: |
         echo "Android directory structure:"
