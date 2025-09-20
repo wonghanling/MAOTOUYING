@@ -80,6 +80,20 @@ jobs:
             echo "Removing package attribute from AndroidManifest.xml..."
             sed -i 's/package="[^"]*"//g' node_modules/capacitor-sms/android/capacitor-sms/src/main/AndroidManifest.xml
           fi
+
+          # Fix Java source code compatibility issues
+          echo "Fixing Java source code compatibility..."
+          # Fix support library imports to AndroidX
+          find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\.v4\.app\./import androidx.core.app./g' {} \;
+          find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\.v4\.content\./import androidx.core.content./g' {} \;
+          find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\./import androidx./g' {} \;
+
+          # Fix Capacitor API calls
+          find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/call\.success(/call.resolve(/g' {} \;
+          find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/call\.error(/call.reject(/g' {} \;
+
+          # Fix Java compatibility version in build.gradle
+          sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/capacitor-sms/build.gradle
         fi
 
         # Also check alternative path structure
@@ -99,6 +113,9 @@ jobs:
             echo "Removing package attribute from AndroidManifest.xml (alternative path)..."
             sed -i 's/package="[^"]*"//g' node_modules/capacitor-sms/android/src/main/AndroidManifest.xml
           fi
+
+          # Fix Java compatibility version in alternative path
+          sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' node_modules/capacitor-sms/android/build.gradle
         fi
 
         # Check if there are any other build.gradle files in capacitor-sms
@@ -111,6 +128,17 @@ jobs:
         # Fix all AndroidManifest.xml files in capacitor-sms
         find node_modules/capacitor-sms -name "AndroidManifest.xml" -exec echo "Found AndroidManifest.xml: {}" \;
         find node_modules/capacitor-sms -name "AndroidManifest.xml" -exec sed -i 's/package="[^"]*"//g' {} \;
+
+        # Fix all Java source files for AndroidX and Capacitor 5 compatibility
+        echo "Applying global Java source fixes..."
+        find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\.v4\.app\./import androidx.core.app./g' {} \;
+        find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\.v4\.content\./import androidx.core.content./g' {} \;
+        find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/import android\.support\./import androidx./g' {} \;
+        find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/call\.success(/call.resolve(/g' {} \;
+        find node_modules/capacitor-sms -name "*.java" -exec sed -i 's/call\.error(/call.reject(/g' {} \;
+
+        # Fix all build.gradle files for Java 11 compatibility
+        find node_modules/capacitor-sms -name "build.gradle" -exec sed -i 's/JavaVersion\.VERSION_1_8/JavaVersion.VERSION_11/g' {} \;
     - name: Verify Android structure
       run: |
         echo "Android directory structure:"
